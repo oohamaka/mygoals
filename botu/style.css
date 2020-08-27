@@ -1,0 +1,210 @@
+/*
+html5doctor.com Reset Stylesheet
+v1.6.1
+Last Updated: 2010-09-17
+Author: Richard Clark - http://richclarkdesign.com
+Twitter: @rich_clark
+*/
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
+
+body {
+    line-height:1;
+}
+
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section {
+    display:block;
+}
+
+nav ul {
+    list-style:none;
+}
+
+blockquote, q {
+    quotes:none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content:'';
+    content:none;
+}
+
+a {
+    margin:0;
+    padding:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
+
+/* change colours to suit your needs */
+ins {
+    background-color:#ff9;
+    color:#000;
+    text-decoration:none;
+}
+
+/* change colours to suit your needs */
+mark {
+    background-color:#ff9;
+    color:#000;
+    font-style:italic;
+    font-weight:bold;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+abbr[title], dfn[title] {
+    border-bottom:1px dotted;
+    cursor:help;
+}
+
+table {
+    border-collapse:collapse;
+    border-spacing:0;
+}
+
+/* change border colour to suit your needs */
+hr {
+    display:block;
+    height:1px;
+    border:0;  
+    border-top:1px solid #cccccc;
+    margin:1em 0;
+    padding:0;
+}
+
+input, select {
+    vertical-align:middle;
+}
+
+/*ここまでリセットCSS*/
+
+h1{
+    font-family: 'Sawarabi Gothic', sans-serif;
+    text-align: center;
+    height: 3.8rem;
+    font-size: 3rem;
+    color: rgb(181, 183, 185);
+    background-color:rgb(6, 148, 243) ;
+}
+
+.add{
+    margin: 30px;
+}
+
+.btn{
+    border-radius: 5px;
+    width: 150px;
+    font-size: 15px;
+    margin: 50px 0 0 50px;
+}
+
+.new-button{
+    margin-top: 50px;
+}
+
+.delete-button{
+    margin-left: 450px;
+}
+
+table{
+    margin: 50px 0 0 50px;
+}
+
+.border{
+    border: 1px dotted;
+    width: 600px;
+    margin: 30px 0 0 30px;
+}
+
+.main-content{
+    display: flex;
+}
+
+main{
+    border-left:1px dotted;
+    margin-left: 20px;
+}
+
+
+textarea{
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid;
+    margin-left: 100px;
+    font-size: 1rem;
+    width: 400px;
+}
+
+input{
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid;
+    font-size: 20px;
+    margin-left: 50px;
+    width: 300px;
+}
+
+main h3{
+    margin-top: 50px;
+    margin-left: 40px;
+
+}
+
+.goals{
+    display: flex;
+    margin: 50px 100px 0 50px;
+}
+
+.goals h2{
+    width: 600px;
+}
+
+.how_to{
+    display: flex;
+    margin-top: 100px;
+}
+
+.date input{
+    width: 10rem;
+}
+
+.checkbox{
+    margin-left: -5rem;
+    margin-right: -8rem;
+    
+}
+
+.fab {
+    margin-left: 5rem;
+}
+
+
+
+

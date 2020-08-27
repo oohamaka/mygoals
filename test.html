@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+<form method="post">
+    <table>
+      <thead>
+        <tr>
+          <th>果物</th>
+          <th>数量</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" name="fluit[0]" value="りんご"></td>
+          <td><input type="number" name="quantity[0]" value="3"></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2"><button id="add_row" type="button">行追加</button></td>
+        </tr>
+      </tfoot>
+    </table>
+    <input type="hidden" name="row_length" value="1">
+    <input type="submit" name="send" value="送信">
+</form>
+
+$(document).on('click', '#add_row', function(e) {
+    var tr_row = '' +
+    '<tr>' +
+      '<td><input type="text" name="fluit" value=""></td>' +
+      '<td><input type="number" name="quantity" value=""></td>' +
+    '</tr>';// 挿入する行のテンプレート
+    var row_cnt = $("table tbody").children().length;// 現在のDOMで表示されているtrの数
+    $(':hidden[name="row_length"]').val(parseInt(row_cnt) + 1);// input type=hiddenに格納されている行数を変更
+    $(tr_row).appendTo($('table > tbody'));// tbody末尾にテンプレートを挿入
+    $('table > tbody > tr:last > td > input').each(function() {
+      var base_name = $(this).attr('name');
+      $(this).attr('name', base_name + '[' + row_cnt + ']');
+    });// input name部分を変更
+  });
+
+</body>
+</html>
