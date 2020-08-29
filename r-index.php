@@ -35,7 +35,7 @@ function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done){
     $stmt->execute($task_data);
 }
 
-// データベースからデータを取得する   
+//データベースからデータを取得する   
 function selectAll($dbh) {
     $stmt = $dbh->prepare('SELECT * FROM goals ORDER BY updated_at DESC');
     $stmt->execute();
@@ -65,7 +65,7 @@ if (!empty($_POST)){
     }
 }
 //データベースからデータを取得
-function select($dbh,$id) {
+/*function select($dbh,$id) {
     $stmt = $dbh->prepare('SELECT * FROM goals where id = :id');
     $stmt->bindParam(':id',$id,PDO::PARAM_INT);
     $stmt->execute();
@@ -81,7 +81,7 @@ catch(Exception $e){
 $select = select($dbh,$id);
 echo $select;
 var_dump($select);
-
+*/
 ?>
 
 
@@ -107,23 +107,20 @@ var_dump($select);
     </header>
     <div class="container-fluid">
      <div class="row">
-      <div class="col-sm-5">
+      <div class="col-sm-6">
        <div class="row">
         <div class="col-12">
          <h3>挑戦中のゴール</h3>
-         <div>
-          <a href="index.html" class="add"><i class="fas fa-plus fa-border fa-2x"></i></a>
-         </div>
           <table id="target-table" class="table table-striped table-hover">
             <tr>
               <th scope="col">チェックボックス</th>
               <th scope="col">挑戦中のゴール</th>
               <th scope="col">達成予定日</th>
             </tr>                          
-              <?php foreach($select as $rec):?>
+              <?php foreach($result as $rec):?>
             <tr>
               <td><input type="checkbox"></td>
-              <td><a href="content.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
+              <td><a href="contents.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
               <td><?php echo $rec["deadline"]?></td>
             </tr>
               <?php endforeach ?> 
@@ -148,7 +145,7 @@ var_dump($select);
           </div>
          </div>
       </div>
-            <div class="col-sm-7">
+            <div class="col-sm-6">
             <form class="form-horizontal" method="post">
                 <div class="form-group">
                     <button type="submit" class="btn btn-info" onclick="clickBtn3()">新しいゴールを追加</button>
