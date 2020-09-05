@@ -48,7 +48,6 @@ function selectAlltasks($dbh) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
 $result = selectAll($dbh);
 $result_tasks = selectAll($dbh);
 
@@ -120,8 +119,8 @@ var_dump($select);
               <?php foreach($result as $rec):?>
             <tr>
               <td><input type="checkbox"></td>
-              <td><a href="contents.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
-              <td><?php echo $rec["deadline"]?></td>
+                <td><a href="contents.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
+                <td><?php echo $rec["deadline"]?></td>
             </tr>
               <?php endforeach ?> 
             </tr>                   
@@ -174,19 +173,19 @@ var_dump($select);
                 <template id="template">
                     <div class="form-inline">
                         <div class="form-group">
-                            <label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
-                            <input type="hidden" name="task_done[]" value="0">
-                            <div class="col-sm-6">
-                                <input type="text" class="form-control" name="task_contents[]">
-                            </div>
-                            <div class="col-sm-4">
-                                <input type="date" class="form-control" name="task_deadline[]">
-                            </div>
+                         <label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
+                         <input type="hidden" name="task_done[]" value="0">
+                         <div class="col-sm-6">
+                            <input type="text" class="form-control" name="task_contents[]">
+                         </div>
+                         <div class="col-sm-4">
+                            <input type="date" class="form-control" name="task_deadline[]">
+                         </div>
                         </div>
                         <div class="form-group">
-                            <div class="col-sm-1">
-                                <a href="/contact.html" class="btn"><i class="fab fa-twitter-square fa-2x"></i></a>
-                            </div>
+                         <div class="col-sm-1">
+                          <a href="/contact.html" class="btn"><i class="fab fa-twitter-square fa-2x"></i></a>
+                         </div>
                         </div>
                     </div>
                 </template>

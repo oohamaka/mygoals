@@ -1,5 +1,6 @@
 <?php
 //取ってくるgoal_idをパラメータとして受け取る。
+$goal_id=$_GET['id'];
 //データベースからデータを取得
 ini_set('display_errors',"on");//エラーを画面に出力
 //ホスト名、DB名、ユーザ名、パスワード、ポートを定義
@@ -9,8 +10,6 @@ define('DB_USER', 'root');
 define('DB_PASSWORD', 'root');
 define('DB_PORT', '8889');
 
-
-$goal_id = $_GET['id'];
 //var_dump($goal_id);
 
 try{
@@ -29,7 +28,7 @@ function select($dbh,$goal_id) {
 }
 
 function select_tasks($dbh,$goal_id){
-    $stmt = $dbh->prepare('SELECT done,contents,deadline FROM tasks where goal_id = :goal_id');
+    $stmt = $dbh->prepare('SELECT id,done,contents,deadline FROM tasks where goal_id = :goal_id');
     $stmt->bindParam(':goal_id',$goal_id,PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -37,12 +36,11 @@ function select_tasks($dbh,$goal_id){
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
+
 //var_dump($select);
 //var_dump($select_tasks);
 
 ?>
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -65,14 +63,23 @@ $select_tasks = select_tasks($dbh,$goal_id);
 </header>
 <div class="form-group">
 <label class="col-sm-3 control-label">ゴール</label>
- <div class="col-sm-9">
-  <p type="text" class="form-control input-sm" name="goals_contents"><?php echo $select['contents']?></P>
+<div class='row'>
+ <div class="col-sm-6">
+  <p class="form-control input-sm"><?php echo $select['contents']?></P>
+ </div>
+ <div class="col-sm-3">
+  <button class="btn btn-info js-done">ゴール達成！</button>
+ </div>
+ <div class="col-sm-3">
+  <button class="btn btn-info js-done">TwitterにUp!</button>
+ </div>
+
  </div>
 </div>
 <div class="form-group">
  <label class="col-sm-3 control-label">いつまでに？</label>
  <div class="col-sm-9">
-  <p type="date" class="form-control" name="goals_deadline"><?php echo $select['deadline']?></p>
+  <p class="form-control"><?php echo $select['deadline']?></p>
  </div>
  </div>
  <div class="form-group">
@@ -82,27 +89,48 @@ $select_tasks = select_tasks($dbh,$goal_id);
  </div>
  <div class="row" >
     <?php foreach($select_tasks as $singletasks):?>
-    <div class="form-group col-sm-2">
-      <button type="submit" class="btn btn-info" onclick="changeUnderline('target')">完了！</button>
-    </div>
-    <div class="col-sm-5">
-     <label type="text" class="form-control input-sm"><?php echo $singletasks['contents']?></label>
-    </div>
-    <div class="col-sm-4">
-     <label type="text" class="form-control"><?php echo $singletasks['deadline']?></label>
-    </div>
+     <div class="form-group col-sm-6 item">
+      <form method="post" action="done-control.php?id=<?php echo $singletasks['id'] ?>">
+        <input type="hidden" name="done" value="1">
+        <button type="submit" class="btn btn-info js-done m-3" onclick="changeUnderline()">完了！</button>
+        <button type="submit" class="btn btn-info mb-3">テスト</button>
+        <button type="button" class="btn btn-info m-3">TwitterにUp!</button>
+        <label type="text" class="form-control input-sm task"><?php echo $singletasks['contents']?></label>
+        <label type="text" class="form-control deadline"><?php echo $singletasks['deadline']?></label>      
+      </form>
+     </div>
     <?php endforeach?>
+    <!--<?php var_dump($singletasks) ?>-->
  </div>
 <button onclick='history.back()' class="btn btn-info">前のページに戻る</button>
+<!--
 <script>
 function changeUnderline(){
-  var obj = document.querySelector('row');
+  var obj = document.querySelector('.target');
   if(obj.style.textDecoration == "line-through"){
     obj.style.textDecoration = "none";
   }else{
     obj.style.textDecoration = "line-through";
   }
 }
+</script>
+-->
+<script>
+  const doneList = document.querySelectorAll(".js-done")//クラス"JS-done"を取得
+  doneList.forEach(function(done){
+  done.addEventListener('click',function(elem){
+    const parentItem = elem.target.parentElement;
+    const task = parentItem.querySelector(".task");
+    const deadline = parentItem.querySelector(".deadline");
+      if(task.style.textDecoration == "line-through"){
+        task.style.textDecoration = "none";
+        deadline.style.textDecoration = 'none';
+        }else{
+        task.style.textDecoration = "line-through";
+        deadline.style.textDecoration = 'line-through';
+      }
+   });
+ });
 </script>
 </body>
 </html>
