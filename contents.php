@@ -1,4 +1,5 @@
 <?php
+
 //取ってくるgoal_idをパラメータとして受け取る。
 $goal_id=$_GET['id'];
 //データベースからデータを取得
@@ -36,11 +37,8 @@ function select_tasks($dbh,$goal_id){
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
-
-//var_dump($select);
-//var_dump($select_tasks);
-
 ?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -93,7 +91,7 @@ $select_tasks = select_tasks($dbh,$goal_id);
       <form method="post" action="done-control.php?id=<?php echo $singletasks['id'] ?>">
         <input type="hidden" name="done" value="1">
         <button type="submit" class="btn btn-info js-done m-3" onclick="changeUnderline()">完了！</button>
-        <button type="submit" class="btn btn-info mb-3">テスト</button>
+        <button type="submit" class="btn btn-info m-3">テスト</button>
         <button type="button" class="btn btn-info m-3">TwitterにUp!</button>
         <label type="text" class="form-control input-sm task"><?php echo $singletasks['contents']?></label>
         <label type="text" class="form-control deadline"><?php echo $singletasks['deadline']?></label>      

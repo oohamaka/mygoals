@@ -22,7 +22,7 @@ try{
 }
 
 //databaseのtable'tasks'に、doneの値を登録する関数の作成
-function updateDone($dbh, $done,$id) {
+function updateDone($dbh,$done,$id) {
     $stmt = $dbh->prepare("UPDATE tasks SET done=? where id=?");
     $data = [];
     $data[] = $done;
@@ -32,9 +32,10 @@ function updateDone($dbh, $done,$id) {
 }
 
 $updateDone = updateDone($dbh, $taskDone, $taskId);
+header( "Location:contents.php?id=1");
 ?>
 
-<script>
+<!--<script>
     var request = new XMLHttpRequest();
     request.open('GET', URL, true);
     request.responseType = 'int';
@@ -42,4 +43,4 @@ $updateDone = updateDone($dbh, $taskDone, $taskId);
     // JSONデータを受信した後の処理
     });
     request.send();
-</script>
+</script>-->
