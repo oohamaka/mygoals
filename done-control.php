@@ -32,7 +32,10 @@ function updateDone($dbh,$done,$id) {
 }
 
 $updateDone = updateDone($dbh, $taskDone, $taskId);
-header( "Location:contents.php?id=1");
+$server = $_SERVER['HTTP_REFERER'];
+var_dump($server);
+header( "Location:$server");
+
 ?>
 
 <!--<script>

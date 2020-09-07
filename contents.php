@@ -1,5 +1,5 @@
 <?php
-
+$returnId = $_GET['id'];
 //取ってくるgoal_idをパラメータとして受け取る。
 $goal_id=$_GET['id'];
 //データベースからデータを取得
