@@ -37,6 +37,7 @@ function select_tasks($dbh,$goal_id){
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
+
 ?>
 
 <!DOCTYPE html>
@@ -63,44 +64,39 @@ $select_tasks = select_tasks($dbh,$goal_id);
 <label class="col-sm-3 control-label">ゴール</label>
 <div class='row'>
  <div class="col-sm-6">
-  <p class="form-control input-sm"><?php echo $select['contents']?></P>
+  <p class="form-control input-sm m-3"><?php echo $select['contents']?></P>
  </div>
  <div class="col-sm-3">
-  <button class="btn btn-info js-done">ゴール達成！</button>
+  <button class="btn btn-info js-done" onclick="document.location.href='achieve-goals.php'">ゴール達成！</button>
  </div>
  <div class="col-sm-3">
   <button class="btn btn-info js-done">TwitterにUp!</button>
  </div>
-
- </div>
+</div>
 </div>
 <div class="form-group">
  <label class="col-sm-3 control-label">いつまでに？</label>
- <div class="col-sm-9">
-  <p class="form-control"><?php echo $select['deadline']?></p>
+ <div class="col-sm-6">
+  <p class="form-control m-3"><?php echo $select['deadline']?></p>
  </div>
- </div>
- <div class="form-group">
-  <label class="col-sm-3 control-label">どうやって？</label>
-  <div class="form-group">
-  </div>
- </div>
+</div>
+<div class="form-group">
+ <label class="col-sm-3 control-label">どうやって？</label>
+</div>
  <div class="row" >
     <?php foreach($select_tasks as $singletasks):?>
-     <div class="form-group col-sm-6 item">
+     <div class="form-group col-sm-10 item">
       <form method="post" action="done-control.php?id=<?php echo $singletasks['id'] ?>">
         <input type="hidden" name="done" value="1">
         <button type="submit" class="btn btn-info js-done m-3" onclick="changeUnderline()">完了！</button>
-        <button type="submit" class="btn btn-info m-3">テスト</button>
         <button type="button" class="btn btn-info m-3">TwitterにUp!</button>
-        <label type="text" class="form-control input-sm task"><?php echo $singletasks['contents']?></label>
-        <label type="text" class="form-control deadline"><?php echo $singletasks['deadline']?></label>      
+        <label type="text" class="form-control input-sm task mx-3"><?php echo $singletasks['contents']?></label>
+        <label type="text" class="form-control deadline mx-3"><?php echo $singletasks['deadline']?></label>      
       </form>
      </div>
     <?php endforeach?>
-    <!--<?php var_dump($singletasks) ?>-->
  </div>
-<button onclick='history.back()' class="btn btn-info">前のページに戻る</button>
+  <button onclick="document.location.href='r-index.php'"  class="btn btn-info m-3">前のページに戻る</button>
 <!--
 <script>
 function changeUnderline(){
@@ -111,7 +107,7 @@ function changeUnderline(){
     obj.style.textDecoration = "line-through";
   }
 }
-</script>
+
 -->
 <script>
   const doneList = document.querySelectorAll(".js-done")//クラス"JS-done"を取得

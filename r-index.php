@@ -63,6 +63,14 @@ if (!empty($_POST)){
         //var_dump($_POST['task_contents'][$i]);
     }
 }
+
+if(!empty($_POST)){
+    $server = $_SERVER['HTTP_REFERER'];
+    header( "Location:$server");
+    exit();
+}
+
+
 //データベースからデータを取得
 /*function select($dbh,$id) {
     $stmt = $dbh->prepare('SELECT * FROM goals where id = :id');
@@ -147,7 +155,7 @@ var_dump($select);
             <div class="col-sm-6">
             <form class="form-horizontal" method="post">
                 <div class="form-group">
-                    <button type="submit" class="btn btn-info" onclick="clickBtn3()">新しいゴールを追加</button>
+                    <button type="submit" class="btn btn-info" name="submit" action="r-index.php">新しいゴールを追加</button>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">ゴール</label>
@@ -193,6 +201,7 @@ var_dump($select);
                     <div class="form-group">
                         <button type="button" class="btn btn-info" onclick="clickBtn2()">タスク行を削除する</button>
                     </div>
+            
                 <!--ボタンの制御-->
                 <script>
                     function clickBtn1(){
@@ -211,10 +220,10 @@ var_dump($select);
                     }
                 </script>
             </form>
+            
             </div>
         </div>
     </div>    
-
 </body>
 </html>
 
