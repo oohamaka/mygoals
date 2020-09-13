@@ -1,4 +1,5 @@
 <?php
+$done= $_GET['done'];
 $returnId = $_GET['id'];
 //取ってくるgoal_idをパラメータとして受け取る。
 $goal_id=$_GET['id'];
@@ -34,6 +35,11 @@ function select_tasks($dbh,$goal_id){
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+//「ゴール達成」ボタンをゴールのdoneにより表示・非表示を変える or 押せる・押せないにする
+//DBのtask tableから全てのタスクのdoneを取得
+//全てのタスクでdone=1なら、ボタン押せる（表示にする）
+//そうでないならボタンを押せない（非表示にする）
+
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
@@ -67,7 +73,9 @@ $select_tasks = select_tasks($dbh,$goal_id);
   <p class="form-control input-sm m-3"><?php echo $select['contents']?></P>
  </div>
  <div class="col-sm-3">
-  <button class="btn btn-info js-done" onclick="document.location.href='achieve-goals.php'">ゴール達成！</button>
+  <button class="btn btn-info js-done" onclick="document.location.href='achieve-goals.php'" method="post">
+    ゴール達成！
+  </button>
  </div>
  <div class="col-sm-3">
   <button class="btn btn-info js-done">TwitterにUp!</button>
@@ -86,12 +94,39 @@ $select_tasks = select_tasks($dbh,$goal_id);
  <div class="row" >
     <?php foreach($select_tasks as $singletasks):?>
      <div class="form-group col-sm-10 item">
-      <form method="post" action="done-control.php?id=<?php echo $singletasks['id'] ?>">
+      <form method="post" action="task-done-control.php?id=<?php echo $singletasks['id'] ?>">
         <input type="hidden" name="done" value="1">
+        <!--<label>
+        <//?php if($singletasks['done']):?>
+          <input type="checkbox" id="checkbox" value="1" name="done" checked>
+         </?php else:?>
+          <input type="checkbox" id="checkbox" value="1" name="done">
+        <//?php endif?>
+        </label>
+          <button type="submit" class="btn btn-info js-done m-3">
+          完了（仮）!
+          </button>-->
+          <p id="result"></p>
+        <!--</label>-->
         <button type="submit" class="btn btn-info js-done m-3" onclick="changeUnderline()">完了！</button>
-        <button type="button" class="btn btn-info m-3">TwitterにUp!</button>
-        <label type="text" class="form-control input-sm task mx-3"><?php echo $singletasks['contents']?></label>
-        <label type="text" class="form-control deadline mx-3"><?php echo $singletasks['deadline']?></label>      
+        <button type="submit" class="btn btn-info js-done m-3">やっぱりまだでした</button>
+        <button type="button" class="btn btn-info m-3">twitterにUp!</button>
+        <?php if($singletasks['done']):?>
+          <label type="text" class="form-control input-sm task mx-3" style="text-decoration:line-through" name="done" value="1">
+            <?php echo $singletasks['contents']?>
+          </label>
+          <label type="text" class="form-control deadline mx-3" style="text-decoration:line-through" name="done" value="1">
+            <?php echo $singletasks['deadline']?>
+          </label>
+        <?php else:?>
+          <label type="text" class="form-control input-sm task mx-3" value="0"name="done" style="text-decoration:none">
+           <?php echo $singletasks['contents']?>
+          </label>
+          <label type="text" class="form-control deadline mx-3" value="0"name="done" style="text-decoration:none">
+           <?php echo $singletasks['deadline']?>
+          </label>
+        <?php endif?>
+               
       </form>
      </div>
     <?php endforeach?>
@@ -109,6 +144,18 @@ function changeUnderline(){
 }
 
 -->
+<script>
+    $(function(){
+      $("#checkbox").on("click",function(){
+        var v = $(this).val();
+        sessionStorage.setItem('key',v);
+      });
+    })
+    $(function(){
+      var d = sessionStorage.getItem('key');
+      $('#result').text(d);
+    })
+</script>
 <script>
   const doneList = document.querySelectorAll(".js-done")//クラス"JS-done"を取得
   doneList.forEach(function(done){
