@@ -3,32 +3,18 @@ $done= $_GET['done'];
 $returnId = $_GET['id'];
 //取ってくるgoal_idをパラメータとして受け取る。
 $goal_id=$_GET['id'];
-//データベースからデータを取得
-ini_set('display_errors',"on");//エラーを画面に出力
-//ホスト名、DB名、ユーザ名、パスワード、ポートを定義
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'mygoals');
-define('DB_USER', 'root');
-define('DB_PASSWORD', 'root');
-define('DB_PORT', '8889');
-
 //var_dump($goal_id);
 
-try{
-    $dbh = new PDO('mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
-    $dbh->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-}catch(PDOException $e){
-    echo $e->getMessage();
-    exit;
-}
+require_once("database.php");
 
+//goalをDBから取得
 function select($dbh,$goal_id) {
     $stmt = $dbh->prepare('SELECT * FROM goals where id = :id');
     $stmt->bindParam(':id',$goal_id,PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
+//taskをDBから取得,取得したgoalとidが一致するもの
 function select_tasks($dbh,$goal_id){
     $stmt = $dbh->prepare('SELECT id,done,contents,deadline FROM tasks where goal_id = :goal_id');
     $stmt->bindParam(':goal_id',$goal_id,PDO::PARAM_INT);
@@ -43,7 +29,6 @@ function select_tasks($dbh,$goal_id){
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
-
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +63,7 @@ $select_tasks = select_tasks($dbh,$goal_id);
   </button>
  </div>
  <div class="col-sm-3">
-  <button class="btn btn-info js-done">TwitterにUp!</button>
+  <button class="btn btn-info js-done">twitterにUp!</button>
  </div>
 </div>
 </div>
@@ -108,8 +93,8 @@ $select_tasks = select_tasks($dbh,$goal_id);
           </button>-->
           <p id="result"></p>
         <!--</label>-->
-        <button type="submit" class="btn btn-info js-done m-3" onclick="changeUnderline()">完了！</button>
-        <button type="submit" class="btn btn-info js-done m-3">やっぱりまだでした</button>
+        <button type="submit" class="btn btn-info js-done m-3" onclick="func1()" id="button1">完了！</button>
+        <button type="submit" class="btn btn-info js-done m-3" onclick='func2()' id="button2">やっぱりまだでした</button>
         <button type="button" class="btn btn-info m-3">twitterにUp!</button>
         <?php if($singletasks['done']):?>
           <label type="text" class="form-control input-sm task mx-3" style="text-decoration:line-through" name="done" value="1">
@@ -144,6 +129,18 @@ function changeUnderline(){
 }
 
 -->
+<script>
+ function func1(){
+    document.getElementById("button1").disabled = true;
+    document.getElementById("button2").disabled = false;
+  }
+
+  function func2(){
+    document.getElementById("button1").disabled = false;
+    document.getElementById("button2").disabled = true;
+  }
+</script>
+
 <script>
     $(function(){
       $("#checkbox").on("click",function(){

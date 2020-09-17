@@ -1,20 +1,20 @@
 <?php
-ini_set('display_errors',"on");//エラーを画面に出力
-//ホスト名、DB名、ユーザ名、パスワード、ポートを定義
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'mygoals');
-define('DB_USER', 'root');
-define('DB_PASSWORD', 'root');
-define('DB_PORT', '8889');
-
-//データベースへ接続
-try{
-    $dbh = new PDO('mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
-    $dbh->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-}catch(PDOException $e){
-    echo $e->getMessage();
+session_start();
+$user = $_POST['auth_id'];
+if(!$_SESSION["login"]){
+    header('Location: login.php');
     exit;
 }
+/*else{
+    echo $auth_id . "さんはログインしています。";
+}*/
+//var_dump($user);
+//exit;
+$user = $_SESSION['user'];
+
+//データベースへ接続
+require_once("database.php");
+
 //データベースへmygoalを登録する関数の作成
 function create($dbh, $contents, $deadline) {
     $stmt = $dbh->prepare("INSERT INTO goals(contents,deadline) VALUES(?,?)");
@@ -22,7 +22,6 @@ function create($dbh, $contents, $deadline) {
     $data[] = $contents;
     $data[] = $deadline;
     $stmt->execute($data);
-    return $dbh->lastInsertId();
 }
 //データベースのtasksを登録する関数の作成
 function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done){
@@ -66,7 +65,7 @@ if (!empty($_POST)){
 
 if(!empty($_POST)){
     $server = $_SERVER['HTTP_REFERER'];
-    header( "Location:$server");
+    header("Location:$server");
     exit();
 }
 
@@ -111,6 +110,7 @@ var_dump($select);
 <body>
     <header>
         <?php include 'header.php'; ?>
+        <?php echo $user['auth_name'];?>
     </header>
     <div class="container-fluid">
      <div class="row">
@@ -156,6 +156,7 @@ var_dump($select);
             <form class="form-horizontal" method="post">
                 <div class="form-group">
                     <button type="submit" class="btn btn-info" name="submit" action="r-index.php">新しいゴールを追加</button>
+                    <input type="hidden" name="auth_id">
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label">ゴール</label>
