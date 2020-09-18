@@ -1,5 +1,5 @@
 <?php
-session_start();
+/*session_start();
 $user = $_POST['auth_id'];
 if(!$_SESSION["login"]){
     header('Location: login.php');
@@ -10,7 +10,8 @@ if(!$_SESSION["login"]){
 }*/
 //var_dump($user);
 //exit;
-$user = $_SESSION['user'];
+//$user = $_SESSION['user'];
+
 
 //データベースへ接続
 require_once("database.php");
