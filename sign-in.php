@@ -4,13 +4,20 @@ require_once("database.php");
 
 $errors = [];
 
+$query = $dbh->prepare("select auth_id from users where auth_id = :auth_id limit 1");
+$query->execute(array(':auth_id' => $auth_id));
+$result = $query->fetch(PDO::FETCH_ASSOC);
+var_dump($result);
+
 function userCreate($dbh,$auth_id,$password){
     $stmt=$dbh->prepare("INSERT INTO users(auth_id,password) VALUES(?,?)");
+    //ALTER TABLE users MODIFY COLUMN email VARCHAR(150) UNIQUE KEY;
     $data = [];
     $data[] = $auth_id;
     $data[] = password_hash($password,PASSWORD_DEFAULT);
     $stmt -> execute($data);
 }
+
 
 if(!empty($_POST)){
     if(empty($_POST['auth_id'])){
@@ -19,11 +26,16 @@ if(!empty($_POST)){
     if(empty($_POST['password'])){
         $errors[] = 'パスワードを入力してください';
     }
-
+    if($result === $_POST['auth_id'] ){
+        $errors[] = "このIDはすでに使われています。";
+    }else{
     if(empty($errors)){
         userCreate($dbh,$_POST['auth_id'],$_POST['password']);
     }
 }
+}
+
+
 ?>
 
 <!DOCTYPE html>
