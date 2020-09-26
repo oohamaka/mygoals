@@ -1,6 +1,8 @@
 <?php
-$taskDone = $_POST['done'];
-$taskId = $_GET['id'];
+include 'includes.php';
+$done = $_POST['done'];
+$goal_id = $_POST['goal_id'];
+
 
 //doneをパラメータとして受け取る。
 //データベースからデータを取得
@@ -20,7 +22,17 @@ try{
     exit;
 }
 
+function updateDone($dbh,$done,$goal_id) {
+    $stmt = $dbh->prepare("UPDATE goals SET done=?,done_date=? where id=?");
+    $data = [];
+    $data[] = $done;
+    $data[] = date("Y-m-d H:i:s");
+    $data[] = $goal_id;
+    $stmt->execute($data);
+    return $dbh->lastInsertId();
+}
 
+$updateDone = updateDone($dbh,$done,$goal_id);
 
 ?>
 

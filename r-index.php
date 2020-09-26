@@ -1,37 +1,43 @@
 <?php
-/*session_start();
-$user = $_POST['auth_id'];
-if(!$_SESSION["login"]){
-    header('Location: login.php');
-    exit;
+session_start();
+//$user = $_SESSION['auth_id'];
+//var_dump($user['auth_id']);
+if (!$_SESSION["login"]) {
+  header('Location: login.php');
+  exit;
 }
-/*else{
-    echo $auth_id . "さんはログインしています。";
-}*/
+else{
+    echo $user['auth_id'] ;
+}
+$user = $_SESSION['user'];
+$user_id = $user['id'];
+//var_dump($user_id);
 //var_dump($user);
-//exit;
-//$user = $_SESSION['user'];
-
 
 //データベースへ接続
 require_once("database.php");
 
+
+
 //データベースへmygoalを登録する関数の作成
-function create($dbh, $contents, $deadline) {
-    $stmt = $dbh->prepare("INSERT INTO goals(contents,deadline) VALUES(?,?)");
+function create($dbh, $user_id,$contents, $deadline) {
+    $stmt = $dbh->prepare("INSERT INTO goals(user_id,contents,deadline) VALUES(?,?,?)");
     $data = [];
+    $data[] = $user_id;
     $data[] = $contents;
     $data[] = $deadline;
     $stmt->execute($data);
+    return $dbh->lastInsertId();
 }
 //データベースのtasksを登録する関数の作成
-function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done){
-    $stmt = $dbh->prepare("INSERT INTO tasks(goal_id,contents,deadline,done) VALUES(?,?,?,?)");
+function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$user_id){
+    $stmt = $dbh->prepare("INSERT INTO tasks(goal_id,contents,deadline,done,user_id) VALUES(?,?,?,?,?)");
     $task_data = [];
     $task_data[] = $goal_id;
     $task_data[] = $task_contents;
     $task_data[] = $task_deadline;
     $task_data[] = $task_done;
+    $task_data[] = $user_id;
     $stmt->execute($task_data);
 }
 
@@ -48,21 +54,42 @@ function selectAlltasks($dbh) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+//データベースからuser_idが一致するものについて抽出
+function selectuserid($dbh,$user_id){
+    $stmt = $dbh->prepare('SELECT contents,deadline,id FROM goals where user_id = :user_id');
+    $stmt->bindParam(':user_id',$user_id,PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+//goalのdoneが１のレコードを抽出する
+function doneGoals($dbh,$user_id){
+    $stmt = $dbh->prepare('SELECT contents,deadline,id,done_date FROM goals where user_id = :user_id and done = 1');
+    $stmt->bindParam(':user_id',$user_id,PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 $result = selectAll($dbh);
 $result_tasks = selectAll($dbh);
+//var_dump($result);
+$selectuserid = selectuserid($dbh,$user_id);
+//var_dump($selectuserid);//$selectuseridは、ゴールの連想配列になっている。
+$doneGoals = doneGoals($dbh,$user_id);
+
 
 if (!empty($_POST)){
     $contents = $_POST['goals_contents'];
     $deadline = $_POST['goals_deadline'];
-    $goal_id = create($dbh,$contents,$deadline);
+    $goal_id = create($dbh,$user_id,$contents,$deadline);
+    //var_dump($goal_id);
     $contents = $_POST['task_contents'];
     $deadline = $_POST['task_deadline'];
     $done = $_POST['task_done'];
-    for($i = 0;count($_POST['task_contents']) > $i ; $i++){
-        create_tasks($dbh,$goal_id,$_POST['task_contents'][$i],$_POST['task_deadline'][$i],$_POST['task_done'][$i]);
-        //var_dump($_POST['task_contents'][$i]);
+    for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_contentsの数（count関数)で判断
+        create_tasks($dbh,$goal_id,$_POST['task_contents'][$i],$_POST['task_deadline'][$i],$_POST['task_done'][$i],$user_id);
     }
 }
+//var_dump($goal_id);
 
 if(!empty($_POST)){
     $server = $_SERVER['HTTP_REFERER'];
@@ -71,24 +98,6 @@ if(!empty($_POST)){
 }
 
 
-//データベースからデータを取得
-/*function select($dbh,$id) {
-    $stmt = $dbh->prepare('SELECT * FROM goals where id = :id');
-    $stmt->bindParam(':id',$id,PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
-try{
-    echo select($dbh,$id);
-}
-catch(Exception $e){
-    print'ただいま障害によりご迷惑をおかけしております。';
-    exit();
-}
-$select = select($dbh,$id);
-echo $select;
-var_dump($select);
-*/
 ?>
 
 
@@ -111,7 +120,7 @@ var_dump($select);
 <body>
     <header>
         <?php include 'header.php'; ?>
-        <?php echo $user['auth_name'];?>
+        <h5 class="text-right mr-4"><?php echo $user['auth_id'].'さんログインなう' ?></h5>
     </header>
     <div class="container-fluid">
      <div class="row">
@@ -125,7 +134,7 @@ var_dump($select);
               <th scope="col">挑戦中のゴール</th>
               <th scope="col">達成予定日</th>
             </tr>                          
-              <?php foreach($result as $rec):?>
+              <?php foreach($selectuserid as $rec):?>
             <tr>
               <td><input type="checkbox"></td>
                 <td><a href="contents.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
@@ -135,7 +144,7 @@ var_dump($select);
             </tr>                   
           </table>
         </div>
-      </div>
+       </div>
          <div class="row">
           <div class="col-12">
             <h3>終了したゴール</h3>
@@ -148,7 +157,14 @@ var_dump($select);
                     <th scope="col">達成したゴール</th>
                     <th scope="col">達成した日</th>
                   </tr>
-                  <tr class="row"><td><input type="checkbox"></td><td><a href="#">テスト1</a></td><td>テスト2</tr>
+                  <tr>
+                   <?php foreach($doneGoals as $goals):?>
+                    <td><input type="checkbox"></td>
+                    <td><a href="contents.php?id=<?php echo $goals['id'] ?>"><?php echo $goals['contents'] ?></a></td>
+                    <td><?php echo date('Y年m月d日H時i分',strtotime($goals["done_date"]))?></td>
+                  </tr>
+                    <?php endforeach ?> 
+                <tr>
                 </table>
           </div>
          </div>
@@ -156,7 +172,7 @@ var_dump($select);
             <div class="col-sm-6">
             <form class="form-horizontal" method="post">
                 <div class="form-group">
-                    <button type="submit" class="btn btn-info" name="submit" action="r-index.php">新しいゴールを追加</button>
+                    <button type="submit" class="btn btn-info mt-5" name="submit" action="r-index.php">新しいゴールを追加</button>
                     <input type="hidden" name="auth_id">
                 </div>
                 <div class="form-group">
@@ -219,6 +235,7 @@ var_dump($select);
                             var deleted = document.getElementById('template');
                             var cloned = template.content.cloneNode(true);
                             document.getElementById('container').removeChild(cloned);
+                        //最後の要素を取って消すのもあり。
                     }
                 </script>
             </form>

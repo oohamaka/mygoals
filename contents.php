@@ -1,9 +1,20 @@
 <?php
-$done= $_GET['done'];
+include 'includes.php';
+session_start();
+if (!$_SESSION["login"]) {
+  header('Location: login.php');
+  exit;
+}
+else{
+    echo $user['auth_id'] ;
+}
+$user = $_SESSION['user'];
+$user_id = $user['id'];
+
+$done = $_GET['done'];
 $returnId = $_GET['id'];
 //取ってくるgoal_idをパラメータとして受け取る。
 $goal_id=$_GET['id'];
-//var_dump($goal_id);
 
 require_once("database.php");
 
@@ -16,11 +27,12 @@ function select($dbh,$goal_id) {
 }
 //taskをDBから取得,取得したgoalとidが一致するもの
 function select_tasks($dbh,$goal_id){
-    $stmt = $dbh->prepare('SELECT id,done,contents,deadline FROM tasks where goal_id = :goal_id');
+    $stmt = $dbh->prepare('SELECT * FROM tasks where goal_id = :goal_id');
     $stmt->bindParam(':goal_id',$goal_id,PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 //「ゴール達成」ボタンをゴールのdoneにより表示・非表示を変える or 押せる・押せないにする
 //DBのtask tableから全てのタスクのdoneを取得
 //全てのタスクでdone=1なら、ボタン押せる（表示にする）
@@ -50,6 +62,7 @@ $select_tasks = select_tasks($dbh,$goal_id);
 <body>
 <header>
     <?php include 'header.php'; ?>
+    <h5 class="text-right mr-4"><?php echo $user['auth_id'].'さんログイン中' ?></h5>
 </header>
 <div class="form-group">
 <label class="col-sm-3 control-label">ゴール</label>
@@ -58,13 +71,36 @@ $select_tasks = select_tasks($dbh,$goal_id);
   <p class="form-control input-sm m-3"><?php echo $select['contents']?></P>
  </div>
  <div class="col-sm-3">
-  <button class="btn btn-info js-done" onclick="document.location.href='achieve-goals.php'" method="post">
-    ゴール達成！
-  </button>
+ <!--ゴール達成ボタンを機能させる-->
+ <!--合計タスク数を求める-->
+ <?php $select_tasks = select_tasks($dbh,$goal_id);?>
+ <?php $countTasks = count($select_tasks);?>
+ <!--doneの合計を求める-->
+ <?php foreach($select_tasks as $singletasks):?>
+  <?php $sumSingleTasks += $singletasks['done'];?>
+ <?php endforeach?>
+ <!--doneの合計と合計task数を突合し、合えばゴール達成、あっていなければ未達成の判断-->
+ <!--<?php for($i = 0;$i < $countTasks;$i++):?>-->
+ <!-- <?php $totalTaskDone = $totalTaskDone + 1;?>-->
+ <!--<?php endfor;?>-->
+<?php if($select['done']==0):?>
+  <?php if($sumSingleTasks == $countTasks):?>
+    <form action="achieve-goals.php" method="post" >
+      <button class="btn btn-info js-done" name="done" value="1" type="submit">
+        ゴール達成！
+      </button>
+      <input type="hidden" name="goal_id" value="<?php echo $goal_id;?>">
+    </form>
+    <?php else:?>
+      <button class="btn btn-info js-done" onclick="document.location.href='achieve-goals.php'" disabled>
+        ゴール達成！
+      </button>
+    <?php endif;?>
+<?php endif;?>
  </div>
- <div class="col-sm-3">
+ <!--<div class="col-sm-3">
   <button class="btn btn-info js-done">twitterにUp!</button>
- </div>
+ </div>-->
 </div>
 </div>
 <div class="form-group">
@@ -80,7 +116,7 @@ $select_tasks = select_tasks($dbh,$goal_id);
     <?php foreach($select_tasks as $singletasks):?>
      <div class="form-group col-sm-10 item">
       <form method="post" action="task-done-control.php?id=<?php echo $singletasks['id'] ?>">
-        <input type="hidden" name="done" value="1">
+        <!--<input type="hidden" name="done" value="1">-->
         <!--<label>
         <//?php if($singletasks['done']):?>
           <input type="checkbox" id="checkbox" value="1" name="done" checked>
@@ -93,21 +129,25 @@ $select_tasks = select_tasks($dbh,$goal_id);
           </button>-->
           <p id="result"></p>
         <!--</label>-->
-        <button type="submit" class="btn btn-info js-done m-3" onclick="func1()" id="button1">完了！</button>
-        <button type="submit" class="btn btn-info js-done m-3" onclick='func2()' id="button2">やっぱりまだでした</button>
-        <button type="button" class="btn btn-info m-3">twitterにUp!</button>
         <?php if($singletasks['done']):?>
-          <label type="text" class="form-control input-sm task mx-3" style="text-decoration:line-through" name="done" value="1">
+          <button type="submit" class="btn btn-info js-done m-3"  id="button1" name="done" value="1" disabled>完了！</button>
+          <button type="submit" class="btn btn-info js-done m-3"  id="button2" name="done" value="0">やっぱりまだでした</button>
+          <button type="button" class="btn btn-info m-3">twitterにUp!</button>
+          <label type="text" class="form-control input-sm task mx-3" style="text-decoration:line-through">
             <?php echo $singletasks['contents']?>
           </label>
-          <label type="text" class="form-control deadline mx-3" style="text-decoration:line-through" name="done" value="1">
+          <label type="text" class="form-control deadline mx-3" style="text-decoration:line-through">
             <?php echo $singletasks['deadline']?>
           </label>
         <?php else:?>
-          <label type="text" class="form-control input-sm task mx-3" value="0"name="done" style="text-decoration:none">
+          <button type="submit" class="btn btn-info js-done m-3"  id="button1" name="done" value="1">完了！</button>
+          <button type="submit" class="btn btn-info js-done m-3"  id="button2" name="done" value="0" disabled>やっぱりまだでした</button>
+          <button type="button" class="btn btn-info m-3">twitterにUp!</button>
+
+          <label type="text" class="form-control input-sm task mx-3" value="0" style="text-decoration:none">
            <?php echo $singletasks['contents']?>
           </label>
-          <label type="text" class="form-control deadline mx-3" value="0"name="done" style="text-decoration:none">
+          <label type="text" class="form-control deadline mx-3" value="0" style="text-decoration:none">
            <?php echo $singletasks['deadline']?>
           </label>
         <?php endif?>
@@ -129,7 +169,7 @@ function changeUnderline(){
 }
 
 -->
-<script>
+<!--<script>
  function func1(){
     document.getElementById("button1").disabled = true;
     document.getElementById("button2").disabled = false;
@@ -139,7 +179,7 @@ function changeUnderline(){
     document.getElementById("button1").disabled = false;
     document.getElementById("button2").disabled = true;
   }
-</script>
+</script>-->
 
 <script>
     $(function(){

@@ -1,6 +1,7 @@
 <?php
 //var_dump($_POST);
-
+//exit();
+include 'includes.php';
 $taskDone = $_POST['done'];
 $taskId = $_GET['id'];
 //doneをパラメータとして受け取る。
@@ -33,7 +34,7 @@ function updateDone($dbh,$done,$id) {
 var_dump($taskDone);
 $updateDone = updateDone($dbh, $taskDone, $taskId);
 $server = $_SERVER['HTTP_REFERER'];
-var_dump($server);
+//var_dump($server);
 header( "Location:$server");
 
 ?>
