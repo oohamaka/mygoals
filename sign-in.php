@@ -3,15 +3,14 @@ session_start();
 require_once("database.php");
 
 $errors = [];
+$auth_id = $_POST['auth_id'];
 
 $query = $dbh->prepare("select auth_id from users where auth_id = :auth_id limit 1");
 $query->execute(array(':auth_id' => $auth_id));
 $result = $query->fetch(PDO::FETCH_ASSOC);
-var_dump($result);
 
 function userCreate($dbh,$auth_id,$password){
     $stmt=$dbh->prepare("INSERT INTO users(auth_id,password) VALUES(?,?)");
-    //ALTER TABLE users MODIFY COLUMN email VARCHAR(150) UNIQUE KEY;
     $data = [];
     $data[] = $auth_id;
     $data[] = password_hash($password,PASSWORD_DEFAULT);
@@ -26,7 +25,8 @@ if(!empty($_POST)){
     if(empty($_POST['password'])){
         $errors[] = 'パスワードを入力してください';
     }
-    if($result === $_POST['auth_id'] ){
+    //if($result['auth_id'] === $_POST['auth_id'] ){
+    if(!empty($result['auth_id'])){//8行めでauth_idでDBに検索をかけているので、配列#resultのauth_id要素が存在すれば、使われていると判断できる。
         $errors[] = "このIDはすでに使われています。";
     }else{
     if(empty($errors)){

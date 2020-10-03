@@ -2,11 +2,10 @@
 session_start();
 require_once("database.php");
 
-function findUserbyId($dbh,$id,$auth_id){
+function findUserbyId($dbh,$auth_id){
     $sql = "select * from users where auth_id = ?";
     $stmt = $dbh->prepare($sql);
     $data = [];
-    $data[] = $id;
     $data[] = $auth_id;
     $stmt->execute($data);
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -14,18 +13,24 @@ function findUserbyId($dbh,$id,$auth_id){
 
 $errors = [];
 if(!empty($_POST)){
-    $user = findUserbyId($dbh,$_POST['id'],$_POST["auth_id"]);
+    $user = findUserbyId($dbh,$_POST["auth_id"],$_POST['password']);
 
     if(password_verify($_POST['password'],$user['password'])){
         //ログイン状態にする
         $_SESSION["login"] = true;
+        //$user['password'] = null;これでも良いが、unsetが一般的
+        unset($user['password']);
         $_SESSION["user"] = $user;
+        //var_dump($user);
         header('Location: r-index.php');
         exit;
     }else{
         $errors[] = "IDまたはパスワードが違います。";
     }
 }
+//var_dump($_POST);
+
+//var_dump($errors);
 
 ?>
 
@@ -54,7 +59,7 @@ if(!empty($_POST)){
     <?php if(!empty($errors)):?>
         <ul>
         <?php foreach($errors as $error):?>
-            <li><php echo $error;?></li>
+            <li><php echo $error ;?></li>
         <?php endforeach ?>
         </ul>
     <?php endif ?>

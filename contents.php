@@ -33,14 +33,37 @@ function select_tasks($dbh,$goal_id){
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+//データベースのtasksを登録する関数の作成
+function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$user_id){
+  $stmt = $dbh->prepare("INSERT INTO tasks(goal_id,contents,deadline,done,user_id) VALUES(?,?,?,?,?)");
+  $task_data = [];
+  $task_data[] = $goal_id;
+  $task_data[] = $task_contents;
+  $task_data[] = $task_deadline;
+  $task_data[] = $task_done;
+  $task_data[] = $user_id;
+  $stmt->execute($task_data);
+}
+
+
+
+
 //「ゴール達成」ボタンをゴールのdoneにより表示・非表示を変える or 押せる・押せないにする
 //DBのtask tableから全てのタスクのdoneを取得
 //全てのタスクでdone=1なら、ボタン押せる（表示にする）
 //そうでないならボタンを押せない（非表示にする）
 
-
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
+if(!empty($_POST)){
+for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_contentsの数（count関数)で判断
+  if(!empty($_POST['task_contents'][$i])){
+    $create_tasks = create_tasks($dbh,$goal_id,$_POST['task_contents'][$i],$_POST['task_deadline'][$i],$_POST['task_done'][$i],$user_id);
+    }
+  }
+}
+//var_dump($_POST);
+//var_dump($create_tasks);
 ?>
 
 <!DOCTYPE html>
@@ -109,9 +132,41 @@ $select_tasks = select_tasks($dbh,$goal_id);
   <p class="form-control m-3"><?php echo $select['deadline']?></p>
  </div>
 </div>
+
 <div class="form-group">
- <label class="col-sm-3 control-label">どうやって？</label>
+<label class="col-sm-3 control-label">どうやって？</label>
+  <div class="form-group">
+    <button type="button" class="btn btn-info " onclick="clickBtn1()">タスク行を追加する</button>                    
+  </div>
 </div>
+
+
+<template id="template">
+  <div class="form-inline">
+    <div class="form-group">
+      <label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
+       <input type="hidden" name="task_done[]" value="0">
+      <div class="col-sm-6">
+       <input type="text" class="form-control" name="task_contents[]">
+      </div>
+      <div class="col-sm-4">
+       <input type="date" class="form-control" name="task_deadline[]">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-1">
+        <a href="/contact.html" class="btn"><i class="fab fa-twitter-square fa-2x"></i></a>
+      </div>
+    </div>
+  </div>
+</template>
+<form class="form-horizontal" method="post">
+  <button type="submit" class="btn btn-info">タスクを追加する</button> 
+  <div id="container"></div>
+  <div class="form-group">
+    <button type="button" class="btn btn-info" onclick="clickBtn2()">タスク行を削除する</button>
+  </div>
+</form>
  <div class="row" >
     <?php foreach($select_tasks as $singletasks):?>
      <div class="form-group col-sm-10 item">
@@ -209,6 +264,27 @@ function changeUnderline(){
       }
    });
  });
+</script>
+<script>
+  function clickBtn1(){
+  // template要素を取得
+     var template = document.querySelector('template');
+  //template要素の内容を複製
+     var clone = template.content.cloneNode(true);
+  // div#containerの中に追加
+     document.getElementById('container').appendChild(clone);
+   }
+   function clickBtn2(){
+    // 要素の削除
+     const container = document.getElementById('container');
+     const last_child = container.querySelector(".form-inline:last-child");
+     //var deleted = document.getElementById('template');
+     //var last_child = document.getElementById('container').lastChild;
+     console.log(last_child);
+     document.getElementById('container').removeChild(last_child);
+   //最後の要素を取って消すのもあり。
+   }
+
 </script>
 </body>
 </html>

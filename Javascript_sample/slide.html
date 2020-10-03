@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        var pictures = ["images/img-01.jpg","images/img-02.jpg","images/img-03.jpg"];
+        function changePic(n){
+            document.getElementById("images").getElementsByTagName("img")[0].src = pictures[n % pictures.length];
+            setTimeout(function(){
+                changePic(n+1);
+            },3000);
+        }
+        function load(){
+            //alert("ロードされました。");
+            //document.getElementById("images").getElementsByTagName("img")[0].src = pictures[1];
+            changePic(0);
+        }
+    </script>
+</head>
+<body onload="load();">
+    <h1 id = "header" onclick="alert();">スライド画像</h1>
+    <div id="images" style = "width:640px; height:400px; margin:0 auto;">
+        <img style = "width: 100%; height:100%">
+    </div>
+    
+</body>
+</html>

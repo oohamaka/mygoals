@@ -18,7 +18,6 @@ $user_id = $user['id'];
 require_once("database.php");
 
 
-
 //データベースへmygoalを登録する関数の作成
 function create($dbh, $user_id,$contents, $deadline) {
     $stmt = $dbh->prepare("INSERT INTO goals(user_id,contents,deadline) VALUES(?,?,?)");
@@ -69,12 +68,21 @@ function doneGoals($dbh,$user_id){
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+//goalのdoneが0のレコードを抽出する
+function NotdoneGoals($dbh,$user_id){
+    $stmt = $dbh->prepare('SELECT contents,deadline,id,done_date FROM goals where user_id = :user_id and done = 0');
+    $stmt->bindParam(':user_id',$user_id,PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 $result = selectAll($dbh);
 $result_tasks = selectAll($dbh);
 //var_dump($result);
 $selectuserid = selectuserid($dbh,$user_id);
 //var_dump($selectuserid);//$selectuseridは、ゴールの連想配列になっている。
 $doneGoals = doneGoals($dbh,$user_id);
+$NotdoneGoals = NotdoneGoals($dbh,$user_id);
 
 
 if (!empty($_POST)){
@@ -96,10 +104,7 @@ if(!empty($_POST)){
     header("Location:$server");
     exit();
 }
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -134,11 +139,11 @@ if(!empty($_POST)){
               <th scope="col">挑戦中のゴール</th>
               <th scope="col">達成予定日</th>
             </tr>                          
-              <?php foreach($selectuserid as $rec):?>
+              <?php foreach($NotdoneGoals as $rec):?>
             <tr>
               <td><input type="checkbox"></td>
                 <td><a href="contents.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
-                <td><?php echo $rec["deadline"]?></td>
+                <td><?php echo date('Y年m月d日',strtotime($rec["deadline"]))?></td>
             </tr>
               <?php endforeach ?> 
             </tr>                   
@@ -161,7 +166,7 @@ if(!empty($_POST)){
                    <?php foreach($doneGoals as $goals):?>
                     <td><input type="checkbox"></td>
                     <td><a href="contents.php?id=<?php echo $goals['id'] ?>"><?php echo $goals['contents'] ?></a></td>
-                    <td><?php echo date('Y年m月d日H時i分',strtotime($goals["done_date"]))?></td>
+                    <td><?php echo date('Y年m月d日',strtotime($goals["done_date"]))?></td>
                   </tr>
                     <?php endforeach ?> 
                 <tr>
@@ -188,32 +193,28 @@ if(!empty($_POST)){
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">どうやって？</label>
                     <div class="form-group">
                         <button type="button" class="btn btn-info " onclick="clickBtn1()">タスク行を追加する</button>                    
-                        <button type="button" class="btn btn-info">チェックを入れたタスク行を削除する</button>
                     </div>
-                </div>
-                <div>
                 </div>
                 <template id="template">
-                    <div class="form-inline">
-                        <div class="form-group">
-                         <label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
-                         <input type="hidden" name="task_done[]" value="0">
-                         <div class="col-sm-6">
-                            <input type="text" class="form-control" name="task_contents[]">
-                         </div>
-                         <div class="col-sm-4">
-                            <input type="date" class="form-control" name="task_deadline[]">
-                         </div>
-                        </div>
-                        <div class="form-group">
-                         <div class="col-sm-1">
-                          <a href="/contact.html" class="btn"><i class="fab fa-twitter-square fa-2x"></i></a>
-                         </div>
-                        </div>
+                  <div class="form-inline">
+                    <div class="form-group">
+                    <label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
+                    <input type="hidden" name="task_done[]" value="0">
+                    <div class="col-sm-6">
+                     <input type="text" class="form-control" name="task_contents[]">
                     </div>
+                    <div class="col-sm-4">
+                     <input type="date" class="form-control" name="task_deadline[]">
+                    </div>
+                    </div>
+                    <div class="form-group">
+                     <div class="col-sm-1">
+                      <a href="/contact.html" class="btn"><i class="fab fa-twitter-square fa-2x"></i></a>
+                     </div>
+                    </div>
+                  </div>
                 </template>
                 <div id="container"></div>
                     <div class="form-group">
@@ -232,9 +233,20 @@ if(!empty($_POST)){
                     }
                     function clickBtn2(){
                         // 要素の削除
-                            var deleted = document.getElementById('template');
-                            var cloned = template.content.cloneNode(true);
-                            document.getElementById('container').removeChild(cloned);
+                        const container = document.getElementById('container');
+                        const last_child = container.querySelector(".form-inline:last-child");
+                        //var deleted = document.getElementById('template');
+                        //var last_child = document.getElementById('container').lastChild;
+                        console.log(last_child);
+                        document.getElementById('container').removeChild(last_child);
+                    //最後の要素を取って消すのもあり。
+
+                    //function clickBtn2(){
+                        // 要素の削除
+                          //  var deleted = document.getElementById('template');
+                            //var last_child = document.querySelector('container').lastChild;
+                          //  console.log(last_child);
+                          //  document.getElementById('container').removeChild(last_child);
                         //最後の要素を取って消すのもあり。
                     }
                 </script>

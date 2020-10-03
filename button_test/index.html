@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form>
+        <input type='text' id='myname'>
+        <button type='submit' id='button1' onclick='func1()'>設定</button>
+        <button type="submit" id="button2" onclick="func2()" disable>クリア</button>
+        <div id="output"></div>
+    </form>
+
+    <script>
+        function func1(){
+            document.getElementById("button1").disabled = true;
+            document.getElementById("button2").disabled = false;
+            let myname_val = document.getElementById("myname").value;
+            document.getElementById("output").innerHTML = `入力された値は「${myname_val}」です。`;
+        }
+
+        function func2(){
+            document.getElementById("button1").disabled = false;
+            document.getElementById("button2").disabled = true;
+            document.getElementById("myname").value = "";
+            document.getElementById("output").innerHTML = '';
+        }
+
+    </script>
+</body>
+</html>
