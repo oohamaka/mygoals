@@ -15,6 +15,7 @@ $done = $_GET['done'];
 $returnId = $_GET['id'];
 //取ってくるgoal_idをパラメータとして受け取る。
 $goal_id=$_GET['id'];
+$delete_id=$_POST['delete'];
 
 require_once("database.php");
 
@@ -42,11 +43,21 @@ function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$us
   $task_data[] = $task_deadline;
   $task_data[] = $task_done;
   $task_data[] = $user_id;
-  $stmt->execute($task_data);
+ $stmt->execute($task_data);
 }
 
-
-
+//テーブルから,チェックしたレコードを削除する
+function delete_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$user_id){
+  $stmt = $dbh->prepare('DELETE FROM tasks where id=:delete_id');
+  $delete_data = [];
+  $delete_data = $goal_id;
+  $delete_data = $task_contents;
+  $delete_data = $task_deadline;
+  $delete_data = $task_done;
+  $delete_data = $user_id;
+  $stmt->execute();
+  echo '削除しました';
+}
 
 //「ゴール達成」ボタンをゴールのdoneにより表示・非表示を変える or 押せる・押せないにする
 //DBのtask tableから全てのタスクのdoneを取得
@@ -55,6 +66,7 @@ function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$us
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
+//$delete_tasks = delete_tasks($dbh,$id,$goal_id,$task_contents,$task_deadline,$task_done,$user_id);
 if(!empty($_POST)){
 for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_contentsの数（count関数)で判断
   if(!empty($_POST['task_contents'][$i])){
@@ -64,6 +76,7 @@ for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_conte
 }
 //var_dump($_POST);
 //var_dump($create_tasks);
+var_dump($delete_tasks);
 ?>
 
 <!DOCTYPE html>
@@ -84,8 +97,8 @@ for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_conte
 </head>
 <body>
 <header>
-    <?php include 'header.php'; ?>
-    <h5 class="text-right mr-4"><?php echo $user['auth_id'].'さんログイン中' ?></h5>
+  <?php include 'header.php'; ?>
+  <h5 class="text-right mr-4"><?php echo $user['auth_id'].'さんログイン中' ?></h5>
 </header>
 <div class="form-group">
 <label class="col-sm-3 control-label">ゴール</label>
@@ -121,6 +134,7 @@ for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_conte
     <?php endif;?>
 <?php endif;?>
  </div>
+
  <!--<div class="col-sm-3">
   <button class="btn btn-info js-done">twitterにUp!</button>
  </div>-->
@@ -135,17 +149,22 @@ for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_conte
 
 <div class="form-group">
 <label class="col-sm-3 control-label">どうやって？</label>
-  <div class="form-group">
-    <button type="button" class="btn btn-info " onclick="clickBtn1()">タスク行を追加する</button>                    
-  </div>
+<div class="form-group">
+ <button type="button" class="btn btn-info col-sm-2 mx-3" onclick="clickBtn1()">入力行を追加する</button>                    
+ <button type="button" class="btn btn-danger col-sm-2 mx-3" onclick="clickBtn2()">入力行を削除する</button>
 </div>
-
+<form class="form-horizontal" method="post">
+  <button type="submit" class="btn btn-info col-sm-2 mx-3">新しいタスクを追加登録する</button>
+  <input type="hidden" name="task_done[]" value="0">
+  <button type="submit" name="delete[]" class="btn btn-danger col-sm-2 mx-3">チェックしたタスクを削除する</button>
+  <div id="container"></div>
+</form>
 
 <template id="template">
   <div class="form-inline">
     <div class="form-group">
-      <label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
-       <input type="hidden" name="task_done[]" value="0">
+      <!--<label class="checkbox-inline col-sm-1"><input type="checkbox"></label>
+       <input type="hidden" name="task_done[]" value="0">-->
       <div class="col-sm-6">
        <input type="text" class="form-control" name="task_contents[]">
       </div>
@@ -160,81 +179,62 @@ for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_conte
     </div>
   </div>
 </template>
-<form class="form-horizontal" method="post">
+<!--<form class="form-horizontal" method="post">
   <button type="submit" class="btn btn-info">タスクを追加する</button> 
   <div id="container"></div>
   <div class="form-group">
     <button type="button" class="btn btn-info" onclick="clickBtn2()">タスク行を削除する</button>
   </div>
-</form>
+</form>-->
  <div class="row" >
-    <?php foreach($select_tasks as $singletasks):?>
-     <div class="form-group col-sm-10 item">
-      <form method="post" action="task-done-control.php?id=<?php echo $singletasks['id'] ?>">
-        <!--<input type="hidden" name="done" value="1">-->
-        <!--<label>
-        <//?php if($singletasks['done']):?>
-          <input type="checkbox" id="checkbox" value="1" name="done" checked>
-         </?php else:?>
-          <input type="checkbox" id="checkbox" value="1" name="done">
-        <//?php endif?>
-        </label>
-          <button type="submit" class="btn btn-info js-done m-3">
-          完了（仮）!
-          </button>-->
+  <?php foreach($select_tasks as $singletasks):?>
+   <div class="form-group col-sm-10 item">
+    <form method="post" action="task-done-control.php?id=<?php echo $singletasks['id'] ?>">
           <p id="result"></p>
-        <!--</label>-->
-        <?php if($singletasks['done']):?>
-          <button type="submit" class="btn btn-info js-done m-3"  id="button1" name="done" value="1" disabled>完了！</button>
-          <button type="submit" class="btn btn-info js-done m-3"  id="button2" name="done" value="0">やっぱりまだでした</button>
-          <button type="button" class="btn btn-info m-3">twitterにUp!</button>
-          <label type="text" class="form-control input-sm task mx-3" style="text-decoration:line-through">
-            <?php echo $singletasks['contents']?>
+      <?php if($singletasks['done']):?>
+        <button type="submit" class="btn btn-info js-done m-3"  id="button1" name="done" value="1" disabled>完了！</button>
+        <button type="submit" class="btn btn-info js-done m-3"  id="button2" name="done" value="0">やっぱりまだでした</button>
+        <button type="button" class="btn btn-info m-3">twitterにUp!</button>
+        <div class="row">
+          <div class="checkbox">
+            <label class="checkbox-inline col-sm-1 ml-3"><input type="checkbox" name="delete[]"></label>
+          </div>
+          <div class="form-group col-sm-5">
+            <label type="text" class="form-control  input-sm task mx-3" style="text-decoration:line-through">
+              <?php echo $singletasks['contents']?>
+            </label>
+          </div>
+          <div class="form-group col-sm-5">
+            <label type="text" class="form-control  deadline mx-3" style="text-decoration:line-through">                
+          <?php echo $singletasks['deadline']?>
+            </label>
+          </div>
+        </div>
+      <?php else:?>
+        <button type="submit" class="btn btn-info js-done m-3"  id="button1" name="done" value="1">完了！</button>
+        <button type="submit" class="btn btn-info js-done m-3"  id="button2" name="done" value="0" disabled>やっぱりまだでした</button>
+        <button type="button" class="btn btn-info m-3">twitterにUp!</button>
+        <div class="row">
+         <div class="checkbox">
+          <label class="checkbox-inline col-sm-1 ml-3"><input type="checkbox" name="delete_task_id"></label>
+         </div>
+         <div class="form-group col-sm-5">
+          <label type="text" class="form-control  input-sm task mx-3" value="0" style="text-decoration:none">
+          <?php echo $singletasks['contents']?>
           </label>
-          <label type="text" class="form-control deadline mx-3" style="text-decoration:line-through">
-            <?php echo $singletasks['deadline']?>
+         </div>
+         <div class="form-group col-sm-5">
+          <label type="text" class="form-control  deadline mx-3" value="0" style="text-decoration:none">
+          <?php echo $singletasks['deadline']?>
           </label>
-        <?php else:?>
-          <button type="submit" class="btn btn-info js-done m-3"  id="button1" name="done" value="1">完了！</button>
-          <button type="submit" class="btn btn-info js-done m-3"  id="button2" name="done" value="0" disabled>やっぱりまだでした</button>
-          <button type="button" class="btn btn-info m-3">twitterにUp!</button>
-
-          <label type="text" class="form-control input-sm task mx-3" value="0" style="text-decoration:none">
-           <?php echo $singletasks['contents']?>
-          </label>
-          <label type="text" class="form-control deadline mx-3" value="0" style="text-decoration:none">
-           <?php echo $singletasks['deadline']?>
-          </label>
-        <?php endif?>
-               
+         </div>
+        </div>
+      <?php endif?>         
       </form>
      </div>
     <?php endforeach?>
  </div>
-  <button onclick="document.location.href='r-index.php'"  class="btn btn-info m-3">前のページに戻る</button>
-<!--
-<script>
-function changeUnderline(){
-  var obj = document.querySelector('.target');
-  if(obj.style.textDecoration == "line-through"){
-    obj.style.textDecoration = "none";
-  }else{
-    obj.style.textDecoration = "line-through";
-  }
-}
-
--->
-<!--<script>
- function func1(){
-    document.getElementById("button1").disabled = true;
-    document.getElementById("button2").disabled = false;
-  }
-
-  function func2(){
-    document.getElementById("button1").disabled = false;
-    document.getElementById("button2").disabled = true;
-  }
-</script>-->
+  <button onclick="document.location.href='r-index.php'" class="btn btn-info m-3">前のページに戻る</button>
 
 <script>
     $(function(){
@@ -276,10 +276,8 @@ function changeUnderline(){
    }
    function clickBtn2(){
     // 要素の削除
-     const container = document.getElementById('container');
+     const container = document.getElementById('container');//145行目を取得
      const last_child = container.querySelector(".form-inline:last-child");
-     //var deleted = document.getElementById('template');
-     //var last_child = document.getElementById('container').lastChild;
      console.log(last_child);
      document.getElementById('container').removeChild(last_child);
    //最後の要素を取って消すのもあり。
