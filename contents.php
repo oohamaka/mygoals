@@ -43,18 +43,14 @@ function create_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$us
   $task_data[] = $task_deadline;
   $task_data[] = $task_done;
   $task_data[] = $user_id;
- $stmt->execute($task_data);
+  $stmt->execute($task_data);
 }
 
 //テーブルから,チェックしたレコードを削除する
-function delete_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$user_id){
-  $stmt = $dbh->prepare('DELETE FROM tasks where id=:delete_id');
+function delete_tasks($dbh,$task_id){
+  $stmt = $dbh->prepare('DELETE FROM tasks where id=:id');
   $delete_data = [];
-  $delete_data = $goal_id;
-  $delete_data = $task_contents;
-  $delete_data = $task_deadline;
-  $delete_data = $task_done;
-  $delete_data = $user_id;
+  $delete_data[] = $task_id;
   $stmt->execute();
   echo '削除しました';
 }
@@ -66,7 +62,7 @@ function delete_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$us
 
 $select = select($dbh,$goal_id);
 $select_tasks = select_tasks($dbh,$goal_id);
-//$delete_tasks = delete_tasks($dbh,$id,$goal_id,$task_contents,$task_deadline,$task_done,$user_id);
+//$delete_tasks = delete_tasks($dbh,$goal_id,$task_contents,$task_deadline,$task_done,$user_id);
 if(!empty($_POST)){
 for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_contentsの数（count関数)で判断
   if(!empty($_POST['task_contents'][$i])){
@@ -74,9 +70,9 @@ for($i = 0;count($_POST['task_contents']) > $i ; $i++){//postされるtask_conte
     }
   }
 }
-//var_dump($_POST);
+var_dump($_POST);
 //var_dump($create_tasks);
-var_dump($delete_tasks);
+
 ?>
 
 <!DOCTYPE html>
@@ -119,7 +115,7 @@ var_dump($delete_tasks);
  <!--<?php for($i = 0;$i < $countTasks;$i++):?>-->
  <!-- <?php $totalTaskDone = $totalTaskDone + 1;?>-->
  <!--<?php endfor;?>-->
-<?php if($select['done']==0):?>
+ <?php if($select['done']==0):?>
   <?php if($sumSingleTasks == $countTasks):?>
     <form action="achieve-goals.php" method="post" >
       <button class="btn btn-info js-done" name="done" value="1" type="submit">
@@ -132,8 +128,8 @@ var_dump($delete_tasks);
         ゴール達成！
       </button>
     <?php endif;?>
-<?php endif;?>
- </div>
+ <?php endif;?>
+</div>
 
  <!--<div class="col-sm-3">
   <button class="btn btn-info js-done">twitterにUp!</button>
@@ -148,17 +144,19 @@ var_dump($delete_tasks);
 </div>
 
 <div class="form-group">
-<label class="col-sm-3 control-label">どうやって？</label>
-<div class="form-group">
- <button type="button" class="btn btn-info col-sm-2 mx-3" onclick="clickBtn1()">入力行を追加する</button>                    
- <button type="button" class="btn btn-danger col-sm-2 mx-3" onclick="clickBtn2()">入力行を削除する</button>
+  <label class="col-sm-3 control-label">どうやって？</label>
+  <div class="form-group">
+  <button type="button" class="btn btn-info col-sm-2 mx-3" onclick="clickBtn1()">入力行を追加する</button>                    
+  <button type="button" class="btn btn-danger col-sm-2 mx-3" onclick="clickBtn2()">入力行を削除する</button>
+  </div>
+  <form class="form-horizontal" method="post">
+    <button type="submit" class="btn btn-info col-sm-2 mx-3">新しいタスクを追加登録</button>
+    <input type="hidden" name="task_done[]" value="0">
+    <div id="container"></div>
+  </form>
 </div>
-<form class="form-horizontal" method="post">
-  <button type="submit" class="btn btn-info col-sm-2 mx-3">新しいタスクを追加登録する</button>
-  <input type="hidden" name="task_done[]" value="0">
-  <button type="submit" name="delete[]" class="btn btn-danger col-sm-2 mx-3">チェックしたタスクを削除する</button>
-  <div id="container"></div>
-</form>
+
+
 
 <template id="template">
   <div class="form-inline">
@@ -197,7 +195,7 @@ var_dump($delete_tasks);
         <button type="button" class="btn btn-info m-3">twitterにUp!</button>
         <div class="row">
           <div class="checkbox">
-            <label class="checkbox-inline col-sm-1 ml-3"><input type="checkbox" name="delete[]"></label>
+            <label class="checkbox-inline col-sm-1 ml-3"><input type="checkbox" name="task_id"></label>
           </div>
           <div class="form-group col-sm-5">
             <label type="text" class="form-control  input-sm task mx-3" style="text-decoration:line-through">
@@ -216,7 +214,7 @@ var_dump($delete_tasks);
         <button type="button" class="btn btn-info m-3">twitterにUp!</button>
         <div class="row">
          <div class="checkbox">
-          <label class="checkbox-inline col-sm-1 ml-3"><input type="checkbox" name="delete_task_id"></label>
+          <label class="checkbox-inline col-sm-1 ml-3"><input type="checkbox" name="task_id"></label>
          </div>
          <div class="form-group col-sm-5">
           <label type="text" class="form-control  input-sm task mx-3" value="0" style="text-decoration:none">
@@ -229,10 +227,14 @@ var_dump($delete_tasks);
           </label>
          </div>
         </div>
-      <?php endif?>         
+      <?php endif?>
       </form>
      </div>
     <?php endforeach?>
+    <button type="submit" class="btn btn-danger col-sm-2 mx-3" >チェックしたタスクを削除
+      <input type="hidden" name="task_id">
+      </button>
+
  </div>
   <button onclick="document.location.href='r-index.php'" class="btn btn-info m-3">前のページに戻る</button>
 

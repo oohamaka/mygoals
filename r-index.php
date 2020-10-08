@@ -75,6 +75,13 @@ function NotdoneGoals($dbh,$user_id){
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+//設定したゴールをやっぱり削除したい時の関数
+function deleteGoals($dbh,$user_id,$goal_id){
+  $stmt = $dbh->prepare('DELETE goals where goal_id = :goal_id');
+  $stmt->bindParam(':user_id',$user_id,PDO::PARAM_STR);
+  $stmt->bindParam(':goal_id',$goal_id,PDO::PARAM_STR);
+  $stmt->execute();
+}
 
 $result = selectAll($dbh);
 $result_tasks = selectAll($dbh);
@@ -104,6 +111,8 @@ if(!empty($_POST)){
     header("Location:$server");
     exit();
 }
+var_dump($_POST);
+var_dump($rec['id']);
 ?>
 
 <!DOCTYPE html>
@@ -131,21 +140,24 @@ if(!empty($_POST)){
      <div class="row">
       <div class="col-sm-6">
        <div class="row">
-        <div class="col-12">
+        <div class="col-sm-12">
          <h3>挑戦中のゴール</h3>
           <table id="target-table" class="table table-striped table-hover">
             <tr>
               <th scope="col">チェックボックス</th>
               <th scope="col">挑戦中のゴール</th>
               <th scope="col">達成予定日</th>
-            </tr>                          
-              <?php foreach($NotdoneGoals as $rec):?>
-            <tr>
-              <td><input type="checkbox"></td>
+            </tr>
+          <form method ="post" action="r-index.php">                      
+            <?php foreach($NotdoneGoals as $rec):?>
+              <tr>
+                <td><input type="checkbox" name="goal_id[]"></td>
                 <td><a href="contents.php?id=<?php echo $rec['id'] ?>"><?php echo $rec['contents'] ?></a></td>
                 <td><?php echo date('Y年m月d日',strtotime($rec["deadline"]))?></td>
-            </tr>
-              <?php endforeach ?> 
+              </tr>
+            <?php endforeach ?>
+            <button type="submit" class="btn btn-danger js-done m-3">削除する</button>
+          </form>   
             </tr>                   
           </table>
         </div>
@@ -250,7 +262,7 @@ if(!empty($_POST)){
                         //最後の要素を取って消すのもあり。
                     }
                 </script>
-            </form>
+          </form>
             
             </div>
         </div>
